@@ -8,18 +8,23 @@ Example with 2 independent sender (one non blocking go-routine, sending heartbea
 package main
 
 import (
-  tcpsender "github.com/hanneslehmann/golib-tcpsender"
+    tcpsender "github.com/hanneslehmann/golib-tcpsender"
   "time"
 )
 
 func main() {
-   sender:=tcpsender.New("localhost",6000)
-   sender2:=tcpsender.New("localhost",6001)
-   go sender.HeartBeat("hb--", 1000)
+   sender_one:=tcpsender.New("localhost",6000)
+   sender_two:=tcpsender.New("localhost",6001)
+
+   go sender_one.StartAndListen()
+   go sender_two.StartAndListen()
+
+   sender_one.HeartBeat("- - HeartBeat\n", 1000)
    time.Sleep(4000 * time.Millisecond)
-   sender2.SendMessage("Hallo")
+   sender_two.SendMessage("Hello")
    for {}
 }
+
 ```
 
-This is only a prrof of concept. Library has to be cleaned up and hardened
+This is only a proof of concept. Library has to be cleaned up and hardened

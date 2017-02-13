@@ -46,8 +46,12 @@ func New(host string,port int) (sender *Sender){
    }
 }
 
-func (s Sender) SendMessage(message string) {
-	go sendMessage(s.msgchan, message)
+func (s Sender) Write(p []byte) (n int, err error) {
+    s.SendMessage(string(p[:]))
+    return
+}
+
+func (s Sender) StartAndListen() {
 	for {
 		conn, err := s.ln.Accept()
 		if err != nil {
@@ -58,18 +62,14 @@ func (s Sender) SendMessage(message string) {
 	}
 }
 
+func (s Sender) SendMessage(message string) {
+	go sendMessage(s.msgchan, message)
+}
+
 
 func (s Sender) HeartBeat(message string, wait int) {
 	  s.Wait = wait
 		go  sendHeartBeat(s.msgchan, message, s.Wait)
-		for {
-			conn, err := s.ln.Accept()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			go handleConnection(conn, s.msgchan, s.addchan, s.rmchan)
-		}
 }
 
 func (c Client) WriteLinesFrom(ch <-chan string) {
